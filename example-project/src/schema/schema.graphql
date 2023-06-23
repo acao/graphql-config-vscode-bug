@@ -1,20 +1,20 @@
+type Query {
+    field: Example
+}
 
-const schema = gql`
-# this is the example enum
 enum ExampleEnum {
     food
     water
     shelter
 }
 
-# for example
 type Example {
     field: String
     field2: ExampleEnum
     fiel3: String
-   shelter: String
-   something: String
-   however: String
+    shelter: String
+    something: String
+    however: String
 }
 
 type Query {
@@ -31,4 +31,3 @@ type Query {
     something2: String
     something3: String
 }
-`

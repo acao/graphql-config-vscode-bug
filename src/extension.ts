@@ -2,8 +2,9 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { readFile } from "node:fs/promises";
-import { loadConfig } from "graphql-config";
+import { GraphQLExtensionDeclaration, loadConfig } from "graphql-config";
 import { join } from "path";
+import { CodeFileLoader } from '@graphql-tools/code-file-loader'
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -19,10 +20,19 @@ export function activate(context: vscode.ExtensionContext) {
 
       const rootDir = vscode.workspace.workspaceFolders![0].uri.fsPath
 
-      const file = await readFile(join(rootDir, "src/query.ts"), { encoding: "utf-8" });
+      const file = await readFile(join(rootDir, "src/queries/query.ts"), { encoding: "utf-8" });
       vscode.window.showInformationMessage(file);
 
-      const config = await loadConfig({ rootDir });
+      const InspectorExtension: GraphQLExtensionDeclaration = api => {
+        // For schema
+        api.loaders.schema.register(new CodeFileLoader())
+        // For documents
+        api.loaders.documents.register(new CodeFileLoader())
+       
+        return { name: 'languageService' }
+      }
+
+      const config = await loadConfig({ rootDir, extensions: [InspectorExtension] });
 
       vscode.window.showInformationMessage(JSON.stringify(config));
 
@@ -31,8 +41,9 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(schema);
       }
 
-      // Display a message box to the user
-      vscode.window.showInformationMessage("Hello World!");
+      const documents = await config?.getDefault().getDocuments();
+      vscode.window.showInformationMessage(JSON.stringify(documents));
+  
     }
   );
 
